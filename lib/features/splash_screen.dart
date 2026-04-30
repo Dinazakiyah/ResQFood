@@ -9,16 +9,47 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _progressAnimation;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    Future.delayed(const Duration(seconds: 3), () {
-      // pindah ke halaman berikutnya
-      // Navigator.pushReplacementNamed(context, '/home');
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
+
+    // Animasi progress bar dari 0 sampai penuh
+    _progressAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    // Animasi fade in konten
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
+      ),
+    );
+
+    _controller.forward();
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -41,88 +72,97 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ),
 
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-
-                // LOGO BOX
-                Container(
-                  width: 128,
-                  height: 128,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 4,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Container(
-                    margin: const EdgeInsets.all(12),
+          FadeTransition(
+            opacity: _fadeAnimation,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // LOGO BOX
+                  Container(
+                    width: 128,
+                    height: 128,
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.2),
+                        width: 4,
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.eco, // bisa ganti logo kamu
-                        color: Colors.white,
-                        size: 50,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // APP NAME
-                const Text(
-                  'ResQFood',
-                  style: AppTextStyles.title,
-                ),
-
-                const SizedBox(height: 8),
-
-                // TAGLINE
-                const Text(
-                  'Reduce Waste, Share Value',
-                  style: AppTextStyles.subtitle,
-                  textAlign: TextAlign.center,
-                ),
-
-                const SizedBox(height: 16),
-
-                // PROGRESS BAR
-                Container(
-                  width: 192,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
                     child: Container(
-                      width: 64,
-                      height: 4,
+                      margin: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.eco,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
-                // ESTABLISHED TEXT
-                const Text(
-                  'ESTABLISHED 2024',
-                  style: AppTextStyles.small,
-                ),
-              ],
+                  // APP NAME
+                  const Text(
+                    'ResQFood',
+                    style: AppTextStyles.title,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // TAGLINE
+                  const Text(
+                    'Reduce Waste, Share Value',
+                    style: AppTextStyles.subtitle,
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // PROGRESS BAR ANIMASI
+                  Container(
+                    width: 192,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: AnimatedBuilder(
+                      animation: _progressAnimation,
+                      builder: (context, _) {
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: FractionallySizedBox(
+                            widthFactor: _progressAnimation.value,
+                            child: Container(
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // ESTABLISHED TEXT
+                  const Text(
+                    'ESTABLISHED 2024',
+                    style: AppTextStyles.small,
+                  ),
+                ],
+              ),
             ),
           ),
         ],

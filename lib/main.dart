@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
-import 'features/splash_screen.dart';
+import 'package:device_preview/device_preview.dart';
+import 'routes/app_routes.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    DevicePreview(
+      enabled: true,
+      builder: (context) => const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
+   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
+      initialRoute: AppRoutes.splash,
+      routes: AppRoutes.routes,
     );
   }
 }
